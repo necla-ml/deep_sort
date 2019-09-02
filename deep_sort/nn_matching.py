@@ -48,9 +48,21 @@ def _cosine_distance(a, b, data_is_normalized=False):
         contains the squared distance between `a[i]` and `b[j]`.
 
     """
-    if not data_is_normalized:
-        a = np.asarray(a) / np.linalg.norm(a, axis=1, keepdims=True)
-        b = np.asarray(b) / np.linalg.norm(b, axis=1, keepdims=True)
+    if not data_is_normalized:        
+        # FIXME: 0 features 
+        if True:
+            a = np.asarray(a)
+            b = np.asarray(b)
+            na = np.linalg.norm(a, axis=1, keepdims=True)
+            nb = np.linalg.norm(b, axis=1, keepdims=True)
+            a /= na + (na==0)
+            b /= nb + (nb==0)
+        else:
+            #print("before sums:", a.sum(axis=1), b.sum(axis=1))
+            #print("before norms:", np.linalg.norm(a, axis=1, keepdims=True), np.linalg.norm(b, axis=1, keepdims=True))
+            a = np.asarray(a) / (np.linalg.norm(a, axis=1, keepdims=True) + 1e-15)
+            b = np.asarray(b) / (np.linalg.norm(b, axis=1, keepdims=True) + 1e-15)
+            #print("after:", sum(a), sum(b))
     return 1. - np.dot(a, b.T)
 
 
