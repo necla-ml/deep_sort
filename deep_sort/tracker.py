@@ -76,8 +76,8 @@ class Tracker:
             self.tracks[track_idx].mark_missed()
         for detection_idx in unmatched_detections:
             self._initiate_track(detections[detection_idx])
-            # FIXME: include new tracks in the matches
-            matches.append((self.tracks[-1].track_id, detection_idx))
+            # TODO: include new tentative tracks in the matches?
+            # matches.append((self.tracks[-1].track_id, detection_idx))
         self.tracks = [t for t in self.tracks if not t.is_deleted()]
 
         # Update distance metric.
@@ -97,7 +97,6 @@ class Tracker:
         #active_tracks = [t.track_id for t in self.tracks]
         #return [(trk_id, det_id) for trk_id, det_id in sorted(matches) if trk_id in active_tracks]
         return sorted(matches)
-
 
     def _match(self, detections):
 
