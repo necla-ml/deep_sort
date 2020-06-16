@@ -67,6 +67,9 @@ class Tracker:
         # Run matching cascade.
         matches, unmatched_tracks, unmatched_detections = \
             self._match(detections)
+        print('matched:', [(self.tracks[ti].track_id, di) for ti, di in matches],
+              'unmatched tracks:', [self.tracks[ti].track_id for ti in unmatched_tracks], 
+              'unmatched_detections:', unmatched_detections)
 
         # Update track set.
         for track_idx, detection_idx in matches:
@@ -76,8 +79,8 @@ class Tracker:
             self.tracks[track_idx].mark_missed()
         for detection_idx in unmatched_detections:
             self._initiate_track(detections[detection_idx])
-            # TODO: include new tentative tracks in the matches?
-            # matches.append((self.tracks[-1].track_id, detection_idx))
+        # XXX track index changes after deleted
+        matches = { self.tracks[tidx].track_id:di for tidx, di in matches }
         self.tracks = [t for t in self.tracks if not t.is_deleted()]
 
         # Update distance metric.
@@ -91,12 +94,8 @@ class Tracker:
             track.features = []
         self.metric.partial_fit(
             np.asarray(features), np.asarray(targets), active_targets)
-
-        # FIXME: return newly matches as [(track_idx, det_idx)*]
-        # return [(trk_id, det_id) for trk_id, det_id in matches if trk_id in active_targets]
-        #active_tracks = [t.track_id for t in self.tracks]
-        #return [(trk_id, det_id) for trk_id, det_id in sorted(matches) if trk_id in active_tracks]
-        return sorted(matches)
+        # XXX return matches to associate with detections
+        return matches
 
     def _match(self, detections):
 
