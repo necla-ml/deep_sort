@@ -67,10 +67,12 @@ class Tracker:
         # Run matching cascade.
         matches, unmatched_tracks, unmatched_detections = \
             self._match(detections)
-        # print('matched:', [(self.tracks[ti].track_id, di) for ti, di in matches],
-        #      'unmatched tracks:', [self.tracks[ti].track_id for ti in unmatched_tracks], 
-        #      'unmatched_detections:', unmatched_detections)
-
+        
+        '''
+        print('matched:', [(self.tracks[ti].track_id, di) for ti, di in matches],
+              'unmatched tracks:', [self.tracks[ti].track_id for ti in unmatched_tracks], 
+              'unmatched_detections:', unmatched_detections)
+        '''
         # Update track set.
         for track_idx, detection_idx in matches:
             self.tracks[track_idx].update(
