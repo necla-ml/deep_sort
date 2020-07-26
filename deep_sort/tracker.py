@@ -105,10 +105,11 @@ class Tracker:
             features = np.array([dets[i].feature for i in detection_indices])
             targets = np.array([tracks[i].track_id for i in track_indices])
             cost_matrix = self.metric.distance(features, targets)
+            # print('feature cost matrix:', cost_matrix)
             cost_matrix = linear_assignment.gate_cost_matrix(
                 self.kf, cost_matrix, tracks, dets, track_indices,
                 detection_indices)
-
+            # print('linearly assigned feature cost matrix:', cost_matrix)
             return cost_matrix
 
         # Split track set into confirmed and unconfirmed tracks.
@@ -118,6 +119,7 @@ class Tracker:
             i for i, t in enumerate(self.tracks) if not t.is_confirmed()]
 
         # Associate confirmed tracks using appearance features.
+        # print(f'Appearance feature matching with {len(confirmed_tracks)} confirmed tracks')
         matches_a, unmatched_tracks_a, unmatched_detections = \
             linear_assignment.matching_cascade(
                 gated_metric, self.metric.matching_threshold, self.max_age,
@@ -130,6 +132,7 @@ class Tracker:
         unmatched_tracks_a = [
             k for k in unmatched_tracks_a if
             self.tracks[k].time_since_update != 1]
+        # print(f'IoU matching with {len(iou_track_candidates)} candidates including unconfirmed tracks')
         matches_b, unmatched_tracks_b, unmatched_detections = \
             linear_assignment.min_cost_matching(
                 iou_matching.iou_cost, self.max_iou_distance, self.tracks,
