@@ -82,7 +82,7 @@ class Tracker:
         for detection_idx in unmatched_detections:
             self._initiate_track(detections[detection_idx])
         # XXX track index changes after deleted
-        matches = { self.tracks[tidx].track_id:di for tidx, di in matches }
+        matches = {self.tracks[tidx].track_id: di for tidx, di in matches} 
         self.tracks = [t for t in self.tracks if not t.is_deleted()]
 
         # Update distance metric.
@@ -105,11 +105,9 @@ class Tracker:
             features = np.array([dets[i].feature for i in detection_indices])
             targets = np.array([tracks[i].track_id for i in track_indices])
             cost_matrix = self.metric.distance(features, targets)
-            # print('feature cost matrix:', cost_matrix)
             cost_matrix = linear_assignment.gate_cost_matrix(
                 self.kf, cost_matrix, tracks, dets, track_indices,
                 detection_indices)
-            # print('linearly assigned feature cost matrix:', cost_matrix)
             return cost_matrix
 
         # Split track set into confirmed and unconfirmed tracks.
@@ -123,7 +121,6 @@ class Tracker:
             linear_assignment.matching_cascade(
                 gated_metric, self.metric.matching_threshold, self.max_age,
                 self.tracks, detections, confirmed_tracks)
-        # print(f'Feature matching with {len(confirmed_tracks)} confirmed tracks: {matches_a}')
 
         # Associate remaining tracks together with unconfirmed tracks using IOU.
         iou_track_candidates = unconfirmed_tracks + [
@@ -136,7 +133,6 @@ class Tracker:
             linear_assignment.min_cost_matching(
                 iou_matching.iou_cost, self.max_iou_distance, self.tracks,
                 detections, iou_track_candidates, unmatched_detections)
-        # print(f'IoU matching with {len(iou_track_candidates)} candidates including unconfirmed tracks: {matches_b}')
 
         matches = matches_a + matches_b
         unmatched_tracks = list(set(unmatched_tracks_a + unmatched_tracks_b))
