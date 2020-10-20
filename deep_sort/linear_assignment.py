@@ -55,7 +55,7 @@ def min_cost_matching(
 
     cost_matrix = distance_metric(
         tracks, detections, track_indices, detection_indices)
-#    print('cost_matrix:', cost_matrix)
+    # print(f'cost_matrix[tids={tuple(trk.track_id for trk in tracks)}, indices={track_indices}]:', cost_matrix)
     cost_matrix[cost_matrix > max_distance] = max_distance + 1e-5
     row_ind, col_ind = linear_assignment(cost_matrix)
 
@@ -189,5 +189,6 @@ def gate_cost_matrix(
         track = tracks[track_idx]
         gating_distance = kf.gating_distance(
             track.mean, track.covariance, measurements, only_position)
+        # print(f"[{row}][{track_idx}]gating_distance={gating_distance}, threshold={gating_threshold}")
         cost_matrix[row, gating_distance > gating_threshold] = gated_cost
     return cost_matrix
