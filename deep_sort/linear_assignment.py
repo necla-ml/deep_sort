@@ -192,3 +192,37 @@ def gate_cost_matrix(
         # print(f"[{row}][{track_idx}]gating_distance={gating_distance}, threshold={gating_threshold}")
         cost_matrix[row, gating_distance > gating_threshold] = gated_cost
     return cost_matrix
+
+def gate_cost_matrix_iain(
+        kf, cost_matrix, tracks, detections, track_indices, detection_indices,
+        gated_cost=INFTY_COST, only_position=False, gating_alpha=0.2, gating_thrd=50):
+    r"""Iain's KF gating
+    Args:
+        gating_alpha(float): max KF distance contribution to combine with visual feature distance
+        gating_threshold(float): max KF distance threshold to filter out
+    """
+
+    gating_dim = 2 if only_position else 4
+    measurements = np.asarray(
+        [detections[i].to_xyah() for i in detection_indices])
+    for row, track_idx in enumerate(track_indices):
+        track = tracks[track_idx]
+        gating_distance = kf.gating_distance(
+            track.mean, track.covariance, measurements, only_position)
+        # cost_matrix[row, gating_distance > gating_threshold] = gated_cost
+        # IAIN: add a little kalman distance to the visual features cosine distance
+        # print(f"[tid={track_idx}] gating_distance(thrd={gating_threshold})={gating_distance}")
+        # print(f"[tid={track_idx}] before gating, cost matrix={cost_matrix}")
+        filtered = gating_distance > gating_thrd
+        candidates = ~filtered
+        cost_matrix[row, filtered] = gated_cost
+        cost_matrix[row, candidates] += gating_alpha * gating_distance[candidates] / gating_thrd
+        '''
+        for i in range(0, cost_matrix[row].shape[0]):
+            if gating_distance[i] > gating_threshold:
+                cost_matrix[row, i] = gated_cost
+            else:
+                cost_matrix[row, i] += gating_alpha * gating_distance[i] / gating_thrd
+        '''
+        # print(f"[tidx={track_idx}] Iain's gating with alpha={gating_alpha} and thrd={gating_thrd}, cost matrix={cost_matrix}")
+    return cost_matrix
